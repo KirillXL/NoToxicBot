@@ -8,13 +8,10 @@ Original file is located at
 """
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
 
 import telebot
 import time
 import cloudpickle
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 import nltk
 nltk.download('punkt')
