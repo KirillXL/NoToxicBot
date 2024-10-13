@@ -40,7 +40,7 @@ nltk.download('stopwords') #Загрузка стоп-слов
 #В датасете информация о негативных комментариях
 
 
-data_path = '/content/drive/MyDrive/Colab Notebooks/MLdatasets/labeled.csv'
+data_path = 'labeled.csv'
 
 df = pd.read_csv(data_path)
 df.head(10)
@@ -106,8 +106,7 @@ precision_score(y_true=test_df["toxic"], y_pred=model_pipeline.predict(test_df["
 
 recall_score(y_true=test_df["toxic"], y_pred=model_pipeline.predict(test_df["comment"]))
 
-comment = input()
-model_pipeline.predict([comment])
+print('Обучение завершено')
 
 import cloudpickle
 
