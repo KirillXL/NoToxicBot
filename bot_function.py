@@ -8,8 +8,6 @@ import os
 import nltk
 nltk.download('punkt')
 
-# импорт файла с моделью
-
 # Загружаем переменные из .env файла
 load_dotenv()
 try:
@@ -24,9 +22,7 @@ except:
 
 #stats = {} словарь для хранения статистики
 
-# загрузим датасет
-
-#model_pipeline = joblib.load('model.pkl')
+# импорт файла с моделью
 
 with open('model.pkl', 'rb') as f:
     model_pipeline = cloudpickle.load(f)
