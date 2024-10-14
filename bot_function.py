@@ -122,7 +122,7 @@ def user_stats(message):
             percentage = round(user_messages / total_messages * 100, 2)
             bot.reply_to(message, f"Статистика для пользователя @{username}:\nВсего сообщений: {user_messages}\nПроцент от общего количества сообщений: {percentage}%")
 '''
-'''@bot.message_handler(func = lambda message :not message.text.startswith('/'))
+@bot.message_handler(func = lambda message :not message.text.startswith('/'))
 def predict(message):
     # Прогноз для комментария от пользователя
 
@@ -135,7 +135,6 @@ def predict(message):
     else:
       bot.reply_to(message,f'Ваш комментарий не токсичен. Вы молодец!😁')
 
-'''
 
 
 bot.polling(none_stop=True, interval=0)
