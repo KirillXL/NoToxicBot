@@ -126,7 +126,7 @@ def user_stats(message):
 def predict(message):
     # Прогноз для комментария от пользователя
 
-
+    bot.reply_to(message, f'Идет обработка')
     # Предсказание с использованием вашей модели
     prediction = int((model_pipeline.predict([message.text])))
     if prediction == 1:
