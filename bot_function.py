@@ -2,14 +2,12 @@
 import telebot
 import time
 import cloudpickle
+
+import json
+from datetime import datetime
+
 from dotenv import load_dotenv
 import os
-
-import nltk
-#nltk.download('punkt')
-
-#punkt_path = nltk.data.find('tokenizers/punkt')
-#print(punkt_path)
 
 # Загружаем переменные из .env файла
 load_dotenv()
@@ -32,13 +30,27 @@ with open('model.pkl', 'rb') as f:
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.reply_to(message, "Привет! Я бот для управления чатом. Напиши /help, чтобы узнать, что я умею.")
+    bot.reply_to(message, "Привет! Я - бот для удаления токсичных комментариев и модерации сервера. Напиши /help, чтобы узнать больше.")
 
 
 
 @bot.message_handler(commands=['help'])
 def help(message):
-    bot.reply_to(message, "/mute - замутить пользователя на определенное время\n/unmute - размутить пользователя")
+    bot.reply_to(message, "Я - бот для удаления токсичных комментариев и модерации сервера. Я автоматически удаляю токсичные комментарии. Если человек ведет себя слишком токсично, я временно лишаю его возможности писать в чат. У меня предусмотрены команды для ручной модерации: /mute - замутить пользователя на определенное время\n/unmute - размутить пользователя")
+
+def log_message(user_id, username, message, is_toxic):
+    log_entry = {
+        "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        "user_id": user_id,
+        "username": username,
+        "message": message,
+        "is_toxic": is_toxic
+    }
+
+    # Запись в файл (например, log.json)
+    with open("log.json", "a" , encoding = 'utf-8') as log_file:
+        log_file.write(json.dumps(log_entry, ensure_ascii = False) + "\n")
+
 
 '''@bot.message_handler(commands=['kick'])
 def kick_user(message):
@@ -132,8 +144,10 @@ def predict(message):
     if prediction == 1:
       bot.reply_to(message,f'Ваш комментарий токсичен. Не делайте так больше😥')
       mute_user(message)
+      log_message(message.from_user.id, message.from_user.username, message.text, True)
     else:
       bot.reply_to(message,f'Ваш комментарий не токсичен. Вы молодец!😁')
+      log_message(message.from_user.id, message.from_user.username, message.text, False)
 
 
 
