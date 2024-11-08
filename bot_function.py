@@ -5,6 +5,8 @@ import cloudpickle
 
 import json
 from datetime import datetime
+import psycopg2
+from psycopg2 import sql
 
 from dotenv import load_dotenv
 import os
@@ -51,37 +53,40 @@ def log_message(user_id, username, message, is_toxic):
     with open("log.json", "a" , encoding = 'utf-8') as log_file:
         log_file.write(json.dumps(log_entry, ensure_ascii = False) + "\n")
 
+
 def save_user(user_id, username, is_toxic):
+    try:
+        conn = psycopg2.connect(
+            dbname=os.getenv("DB_NAME"),
+            user=os.getenv("USER"),
+            password=os.getenv("PASSWORD"),
+            host=os.getenv("HOST"),
+            port=os.getenv("PORT")
+        )
+        cursor = conn.cursor()
+        print("Соединение с базой данных успешно установлено!")
 
-    data_file = "user_data.json"
+    except psycopg2.OperationalError as e:
+        print("Не удалось подключиться к базе данных!")
+        print("Ошибка:", e)
 
-    # Шаг 1: Загрузка данных из файла (если файл существует)
+    cursor.execute("SELECT toxic_count FROM users WHERE user_id = %s", (user_id,))
+    result = cursor.fetchone()
 
-    if os.path.exists(data_file):
-        with open(data_file, "r") as file:
-            try:
-                data = json.load(file)
-            except:
-                data = {}
-    else:
-        data = {}
+    if result:
+        if is_toxic:
+            new_count = int(result[0] + 1)
+            cursor.execute("UPDATE users SET toxic_count = %s WHERE user_id = %s", (new_count, user_id,))
+    '''else:
+        toxic_count = 1 if is_toxic else 0
+        cursor.execute(
+            "INSERT INTO users (user_id, username, toxic_count) VALUES (%s,%s,%s)", (user_id, username, toxic_count,)
+        )'''
 
-        # Шаг 2: Обновление информации о пользователя
-    if user_id not in data["user"]:
-        data[user_id] = {"username": username, "toxic_comments": 0}
-'''
-    # Если комментарий токсичный, увеличиваем количество нарушений
-    if is_toxic:
-        data[user_id]["toxic_comments"] += 1
-
-    # Шаг 3: Сохранение обновленных данных в файл
-    with open("user_data.json", "w") as file:
-        json.dump(data, file)
-
-    # Шаг 4: Проверка, нужно ли мутировать пользователя (например, при 3 токсичных комментариях)
-    if data[user_id]["toxic_comments"] >= 3:
-        return True  # Пользователь должен быть замучен
-    return False  # Пользователь пока не нарушил лимит'''
+    conn.commit()
+    # Закрываем соединение при завершении работы бота
+    cursor.close()
+    conn.close()
 
 '''@bot.message_handler(commands=['kick'])
 def kick_user(message):
@@ -157,20 +162,23 @@ def user_stats(message):
 def predict(message):
     # Прогноз для комментария от пользователя
 
-    bot.reply_to(message, f'Идет обработка')
+    print('Идет обработка')
     # Предсказание с использованием вашей модели
     prediction = int((model_pipeline.predict([message.text])))
     if prediction == 1:
-      bot.reply_to(message,f'Ваш комментарий токсичен. Не делайте так больше😥')
-      mute_user(message)
-      log_message(message.from_user.id, message.from_user.username, message.text, True)
-      is_muted = save_user(message.from_user.id, message.from_user.username, True)
+        is_toxic = True
+        bot.reply_to(message,f'Ваш комментарий токсичен. Не делайте так больше😥')
+        mute_user(message)
+        log_message(message.from_user.id, message.from_user.username, message.text, is_toxic)
+        save_user(message.from_user.id, message.from_user.username, is_toxic)
+        '''is_muted = save_user(message.from_user.id, message.from_user.username, True)
       if is_muted:
-          bot.reply_to(message, 'Вы были замучены за токсичные комментарии.')
+          bot.reply_to(message, 'Вы были замучены за токсичные комментарии.')'''
     else:
-      bot.reply_to(message,f'Ваш комментарий не токсичен. Вы молодец!😁')
-      log_message(message.from_user.id, message.from_user.username, message.text, False)
-      save_user(message.from_user.id, message.from_user.username, False)
+        is_toxic = False
+        bot.reply_to(message,f'Ваш комментарий не токсичен. Вы молодец!😁')
+        log_message(message.from_user.id, message.from_user.username, message.text, is_toxic)
+        save_user(message.from_user.id, message.from_user.username, is_toxic)
 
 
 
