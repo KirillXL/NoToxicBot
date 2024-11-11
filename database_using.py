@@ -61,6 +61,12 @@ def log_message(user_id, username, message, is_toxic):
     conn.commit()
     print("Сообщение успешно добавлено в базу данных.")
 
+def num_toxcom(user_id):
+    cursor.execute("SELECT toxic_count FROM users WHERE user_id = %s", (user_id,))
+    num_toxic = cursor.fetchone()
+    return num_toxic
+
+
 # Закрытие соединения
 def close_connection():
     cursor.close()
