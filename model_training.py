@@ -32,7 +32,7 @@ nltk.download('stopwords') #Загрузка стоп-слов
 #В датасете информация о негативных комментариях
 
 
-data_path = 'labeled.csv'
+data_path = 'Dataframe/labeled.csv'
 
 df = pd.read_csv(data_path)
 df.head(10)
