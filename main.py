@@ -31,10 +31,21 @@ def start(message):
 def help(message):
     bot_function.help_bot(bot, message)
 
+@bot.message_handler(commands = ['mute'])
+def mute(bot,message):
+    bot_function.mute_user(bot, message)
+
+@bot.message_handler(commands = ['unmute'])
+def unmute(bot,message):
+    bot_function.unmute_user(bot,message)
+
+@bot.message_handler(commands = ['kick'])
+def kick(bot,message):
+    bot_function.kick_user(bot,message)
+
 @bot.message_handler(func=lambda message: not message.text.startswith('/'))
 def predict(message):
     bot_function.predict_bot(bot,message, model_pipeline)
-
 
 # Запуск бота и закрытие соединения при завершении
 try:
